@@ -1,5 +1,7 @@
 # 🧮 Polirubro AI — Intelligent Pricing Agent & Simulator
 
+[![Deploy con Vercel](https://therealsujitk-vercel-badge.vercel.app/?app=polirubro-pricing-agent)](https://polirubro-pricing-agent.vercel.app)
+
 [English Version Below]
 
 Un motor inteligente de cálculo de precios y simulador financiero, diseñado con enfoque mobile-first para comercios minoristas (polirubros) en Argentina. Automatiza la aritmética financiera, la inyección de IVA, el cálculo de márgenes dinámicos y el redondeo adaptado al flujo de caja local.

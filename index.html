@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Precios — Polirubro</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f8f5;
+      --surface: #ffffff;
+      --border: #e2e0da;
+      --text: #1a1a18;
+      --text-muted: #6b6a66;
+      --text-hint: #9e9c97;
+      --accent: #1a6b3c;
+      --accent-light: #e8f5ee;
+      --danger: #c0392b;
+      --danger-light: #fdf0ee;
+      --success: #1a6b3c;
+      --success-light: #e8f5ee;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    header p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.375rem;
+    }
+
+    select, textarea {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      appearance: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b6a66' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+    }
+
+    textarea {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+      min-height: 160px;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-hint);
+      margin-top: 0.375rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      border: none;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+
+    .btn-secondary:hover { background: var(--bg); }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 480px) {
+      .metrics { grid-template-columns: 1fr; }
+    }
+
+    .metric {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 1rem;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .metric.success { background: var(--success-light); }
+    .metric.success .metric-value { color: var(--success); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead tr {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 0.75rem 1rem;
+      font-weight: 500;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    th:first-child { text-align: left; }
+    th:not(:first-child) { text-align: right; }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    td:first-child {
+      font-weight: 500;
+      color: var(--text);
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    td:not(:first-child) { text-align: right; }
+
+    .td-muted { color: var(--text-muted); }
+    .td-hint { color: var(--text-hint); font-size: 0.75rem; }
+    .td-success { color: var(--success); }
+    .td-strong { font-weight: 600; }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .error {
+      background: var(--danger-light);
+      border: 1px solid #f5c6c2;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: var(--danger);
+      margin-top: 1rem;
+    }
+
+    #resultado { display: none; }
+    #error-box { display: none; }
+
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-hint);
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🧮 Calculadora de Precios</h1>
+    <p>Polirubro · Cálculo de IVA + margen de ganancia por rubro</p>
+  </header>
+
+  <div class="card">
+    <div class="grid-2">
+      <div>
+        <label for="rubro">Rubro</label>
+        <select id="rubro">
+          <option value="libreria">Librería / Escolar / Limpieza (60%)</option>
+          <option value="perfumeria">Perfumería envase cerrado (50%)</option>
+          <option value="regalo">Regalería / Bazar / Bijouterie (80%)</option>
+          <option value="suelto">Productos Sueltos (80%)</option>
+        </select>
+      </div>
+      <div>
+        <label for="iva">IVA en el precio de costo</label>
+        <select id="iva">
+          <option value="sin">Sin IVA (agregar 21%)</option>
+          <option value="con">Con IVA incluido</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label for="productos">Productos</label>
+      <textarea id="productos" placeholder="cuaderno 850&#10;lapicera 320&#10;goma 95&#10;corrector 480&#10;tijera 1200"></textarea>
+      <p class="hint">Un producto por línea · Formato: nombre precio · Ejemplo: cuaderno 850</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="calcular()">
+      Calcular precios
+    </button>
+  </div>
+
+  <div id="error-box" class="error"></div>
+
+  <div id="resultado">
+    <div class="metrics" id="metricas"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Costo s/IVA</th>
+            <th>Costo c/IVA</th>
+            <th>Precio venta</th>
+            <th>Ganancia $</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+    <button class="btn btn-secondary" onclick="copiar()">
+      📋 Copiar tabla
+    </button>
+  </div>
+
+  <footer>
+    Polirubro AI · v1.0 · Córdoba, Argentina
+  </footer>
+
+</div>
+
+<script>
+  const MARGENES = { libreria:0.60, perfumeria:0.50, regalo:0.80, suelto:0.80 };
+
+  function redondear50(n) {
+    const pesos = Math.round(n * 100) / 100;
+    const abajo = Math.floor(pesos / 50) * 50;
+    const distAbajo = pesos - abajo;
+    return distAbajo < 25 ? abajo : abajo + 50;
+  }
+
+  function fmt(n) {
+    return '$' + n.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function fmtInt(n) {
+    return '$' + Math.round(n).toLocaleString('es-AR');
+  }
+
+  function parsearLinea(linea) {
+    linea = linea.trim();
+    if (!linea) return null;
+    const m = linea.match(/^(.+?)\s+([\d.,]+)\s*$/);
+    if (!m) return null;
+    const nombre = m[1].trim();
+    const precio = parseFloat(m[2].replace(',', '.'));
+    if (isNaN(precio) || precio <= 0) return null;
+    return { nombre, precio };
+  }
+
+  function calcular() {
+    const errDiv = document.getElementById('error-box');
+    const resDiv = document.getElementById('resultado');
+    errDiv.style.display = 'none';
+    resDiv.style.display = 'none';
+
+    const rubro = document.getElementById('rubro').value;
+    const tieneIVA = document.getElementById('iva').value === 'con';
+    const lineas = document.getElementById('productos').value.split('\n');
+
+    const items = [], errores = [];
+    lineas.forEach((l, i) => {
+      if (!l.trim()) return;
+      const p = parsearLinea(l);
+      if (!p) errores.push(`Línea ${i+1}: "${l.trim()}" — formato inválido`);
+      else items.push(p);
+    });
+
+    if (items.length === 0) {
+      errDiv.textContent = 'No se encontraron productos válidos. Formato: nombre precio (ej: cuaderno 850)';
+      errDiv.style.display = 'block';
+      return;
+    }
+
+    const margen = MARGENES[rubro];
+    let totalInvertido = 0, totalVenta = 0;
+    const filas = [];
+
+    items.forEach(item => {
+      const costoConIVA = tieneIVA
+        ? item.precio
+        : Math.round(item.precio * 121) / 100;
+      const costoSinIVA = tieneIVA ? null : item.precio;
+      const precioVenta = redondear50(costoConIVA * (1 + margen));
+      const ganancia = Math.round((precioVenta - costoConIVA) * 100) / 100;
+
+      totalInvertido += costoConIVA;
+      totalVenta += precioVenta;
+      filas.push({ nombre: item.nombre, costoSinIVA, costoConIVA, precioVenta, ganancia, tieneIVA });
+    });
+
+    totalInvertido = Math.round(totalInvertido * 100) / 100;
+    const gananciaTotal = Math.round((totalVenta - totalInvertido) * 100) / 100;
+
+    const tbody = document.getElementById('tabla-body');
+    tbody.innerHTML = '';
+    filas.forEach(f => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${f.nombre}</td>
+        <td class="td-muted">${f.tieneIVA ? '<span class="td-hint">incluido</span>' : fmt(f.costoSinIVA)}</td>
+        <td class="td-muted">${fmt(f.costoConIVA)}</td>
+        <td class="td-strong">${fmtInt(f.precioVenta)}</td>
+        <td class="td-success">${fmt(f.ganancia)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('metricas').innerHTML = `
+      <div class="metric">
+        <div class="metric-label">Total invertido</div>
+        <div class="metric-value">${fmt(totalInvertido)}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total a recuperar</div>
+        <div class="metric-value">${fmtInt(totalVenta)}</div>
+      </div>
+      <div class="metric success">
+        <div class="metric-label">Ganancia estimada</div>
+        <div class="metric-value">${fmt(gananciaTotal)}</div>
+      </div>
+    `;
+
+    resDiv.style.display = 'block';
+
+    if (errores.length > 0) {
+      errDiv.textContent = 'Algunas líneas se ignoraron: ' + errores.join(' | ');
+      errDiv.style.display = 'block';
+    }
+  }
+
+  function copiar() {
+    const rubroEl = document.getElementById('rubro');
+    const ivaEl = document.getElementById('iva');
+    const filas = document.querySelectorAll('#tabla-body tr');
+    let txt = `Rubro: ${rubroEl.options[rubroEl.selectedIndex].text}\n`;
+    txt += `IVA: ${ivaEl.options[ivaEl.selectedIndex].text}\n\n`;
+    txt += 'Producto\t\tCosto c/IVA\tPrecio Venta\tGanancia\n';
+    txt += '─'.repeat(60) + '\n';
+    filas.forEach(f => {
+      const c = f.querySelectorAll('td');
+      txt += `${c[0].textContent}\t\t${c[2].textContent}\t${c[3].textContent}\t${c[4].textContent}\n`;
+    });
+    navigator.clipboard.writeText(txt).catch(() => alert('Seleccioná la tabla manualmente para copiar'));
+  }
+</script>
+</body>
+</html>
